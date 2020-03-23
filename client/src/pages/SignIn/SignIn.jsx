@@ -1,5 +1,5 @@
 import React from "react";
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import axios from 'axios';
 
 import Alert from '../../components/Alert/Alert';
@@ -36,7 +36,7 @@ class SignIn extends React.Component {
           //console.log(res);
           //console.log(this.props);
           this.props.logInState();
-          this.props.history.push("/");
+          setTimeout(() => this.props.history.push("/"), 200);
       } catch (err) {
         const error = err.response.data;
         console.log(error)
@@ -58,12 +58,14 @@ class SignIn extends React.Component {
 
   render() {
     return (
+      <>
       <div className="sign-in">
         <form onSubmit={this.handleSubmit}>
+          <h2>Logowanie</h2>
           <input
             type="email"
             name="email"
-            placeholder="email"
+            placeholder="Email"
             value={this.state.email}
             onChange={this.handleChange}
             required
@@ -71,15 +73,17 @@ class SignIn extends React.Component {
           <input
             type="password"
             name="password"
-            placeholder="password"
+            placeholder="Hasło"
             value={this.state.password}
             onChange={this.handleChange}
             required
           />
-          <button type="submit"> Sign In</button>
+          <button type="submit">Zaloguj się</button>
+          <h3>Nie posiadasz konta? Zarejestruj się <Link to="/sign-up">tutaj!</Link></h3>
         </form>
-        <Alert messages={this.state.errors}/>
       </div>
+      <Alert messages={this.state.errors}/>
+      </>
     );
   }
 }

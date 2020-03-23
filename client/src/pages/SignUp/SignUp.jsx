@@ -1,6 +1,8 @@
 import React from "react";
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import axios from 'axios';
+
+import Alert from '../../components/Alert/Alert';
 
 import './SignUp.scss';
 
@@ -12,7 +14,8 @@ class SignUp extends React.Component {
         username: "",
         email: "",
         password: "",
-        passwordRep: ""
+        passwordRep: "",
+        errors: []
       };
     }
   
@@ -21,7 +24,7 @@ class SignUp extends React.Component {
   
       const { username, email, password, passwordRep } = this.state;
       if(password !== passwordRep) {
-          return console.log("Hasła nie są takie same!");
+          return this.setState({ errors: [{ text: "Podane hasła nie są takie same", type: "fail" }] });
       } else {
       try {
         const config = {
@@ -40,8 +43,9 @@ class SignUp extends React.Component {
             this.props.history.push("/postac");
         } catch (err) {
           console.log(err);
-          const errors = err.response.data.errors;
-          errors.map( error => console.log(error.msg));
+          const error = err.response.data;
+          this.setState({ errors: error });
+          //error.map( error => console.log(error.msg));
         }
   
       } catch (err) {
@@ -58,12 +62,14 @@ class SignUp extends React.Component {
   
     render() {
       return (
+        <>
         <div className="sign-in">
           <form onSubmit={this.handleSubmit}>
+            <h2>Rejestracja</h2>
             <input
               type="text"
               name="username"
-              placeholder="username"
+              placeholder="Nazwa użytkownika"
               value={this.state.username}
               onChange={this.handleChange}
               required
@@ -71,7 +77,7 @@ class SignUp extends React.Component {
             <input
               type="email"
               name="email"
-              placeholder="email"
+              placeholder="Email"
               value={this.state.email}
               onChange={this.handleChange}
               required
@@ -79,7 +85,7 @@ class SignUp extends React.Component {
             <input
               type="password"
               name="password"
-              placeholder="password"
+              placeholder="Hasło"
               value={this.state.password}
               onChange={this.handleChange}
               required
@@ -87,14 +93,17 @@ class SignUp extends React.Component {
             <input
               type="password"
               name="passwordRep"
-              placeholder="Repeate password"
+              placeholder="Powtórz hasło"
               value={this.state.passwordRep}
               onChange={this.handleChange}
               required
             />
-            <button type="submit"> Sign Up</button>
+            <button type="submit">Zarejestruj się</button>
+            <h3>Masz już konto? Zaloguj się <Link to="/sign-in">tutaj!</Link></h3>
           </form>
         </div>
+        <Alert messages={this.state.errors}/>
+        </>
       );
     }
   }

@@ -8,7 +8,6 @@
     flex-direction: column-reverse;
     justify-content: center;
     align-items: center;
-    animation: alertVisibility 5s ease-out;
     backface-visibility: hidden;
     transform: translateZ(0);
 
@@ -21,24 +20,13 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         margin-top: 1rem;
 
+
         &.success {
             background-color: #2ecc71;
         }
 
         &.fail {
             background-color: #e74c3c;
-        }
-    }
-
-    @keyframes alertVisibility {
-        0% {
-            opacity: 1;
-        }
-        70% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 0;
         }
     }
  

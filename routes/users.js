@@ -22,8 +22,10 @@ router.post('/', [
   ], (req, res) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+      if(errors.param === "email") return res.status(400).json([{ text: "Proszę podać poprawny adres email", type: "fail" }]);
+      else if(errors.param === "username") return res.status(400).json([{ text: "Nazwa użytkownika jest wymagana", type: "fail" }]);
+      else return res.status(400).json([{ text: "Hasło musi zawierać 8 lub więcej znaków", type: "fail" }]);
+    };
 
     const { username, email, password } = req.body;
 
@@ -32,10 +34,10 @@ router.post('/', [
         db.query(
             `SELECT email FROM users WHERE email = '${email}'`,
             async (err, result) => {
-              if (err) { console.log(err);res.status(500).send("Server error")}
+              if (err) { console.log(err);res.status(500).json([{ text: "Błąd serwera", type: "fail" }]);}
               // Check user exists
               else if (result.length > 0)
-                res.status(400).json({ errors: [{ msg: "User already exists" }] });
+                res.status(400).json([{ text: "Ten użytkownik jest już zarejestrowany", type: "fail" }]);
               else {
                 // Hasing password
                 const salt = await bcrypt.genSalt(10);
@@ -59,9 +61,9 @@ router.post('/', [
                 await db.query(
                   `SELECT id, email FROM users WHERE email = '${email}'`,
                   async (err, result) => {
-                    if (err) res.status(500).send("Server error");
+                    if (err) res.status(500).json([{ text: "Błąd serwera", type: "fail" }]);
                     else if (result.length === 0)
-                    res.status(400).json({ errors: [{ msg: "Auth user not find" }] });
+                    res.status(400).json([{ text: "Ten użytkownik nie istnieje", type: "fail" }]);
                     else {
                       const user = result[0];
                       console.log(result);
@@ -77,7 +79,7 @@ router.post('/', [
                         config.get("jwtSecret"),
                         { expiresIn: 360000 },
                         (err, token) => {
-                          if (err) res.status(500).send("Server error");
+                          if (err) res.status(500).json([{ text: "Błąd serwera", type: "fail" }]);
                           else res.status(200).json({ token });
                         }
                       );
@@ -89,7 +91,7 @@ router.post('/', [
           );
     } catch (err) {
         console.error(err.message);
-        res.status(500).send("Server error");
+        res.status(500).json([{ text: "Błąd serwera", type: "fail" }]);
     }
   });
 
