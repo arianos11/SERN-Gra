@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const auth = require("../middleware/auth");
-const sendMail = require("../utils/email");
+// const sendMail = require("../utils/email");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
@@ -17,7 +17,7 @@ router.get("/", auth, (req, res) => {
     db.query(
       `SELECT id, username, email, image, created FROM users WHERE id = ${req.user.id}`,
       (err, result) => {
-        res.json(result);
+        res.status(200).json(result);
       }
     );
   } catch (err) {
@@ -26,7 +26,7 @@ router.get("/", auth, (req, res) => {
   }
 });
 
-// @route   GET api/auth
+// @route   POST api/auth
 // @desc    Login user
 // @access  Public
 
@@ -46,13 +46,13 @@ router.post(
 
     try {
       db.query(
-        `SELECT id, email, password FROM users WHERE email = '${email}'`,
+        `SELECT id, email, password, verified FROM users WHERE email = '${email}'`,
         async (err, result) => {
           if (err) {
             console.log(err);
-            res.code(500), json("Server error");
+            return res.status(500).json([{ text: "Server error", type: 'fail'}]);
           } else if (result.length === 0) {
-            res.status(400).json({ errors: [{ msg: "Invalid Credentials" }] });
+            return res.status(400).json([{ text: "Invalid Credentials", type: 'fail'}]);
           }
 
           const user = result[0];
@@ -62,7 +62,11 @@ router.post(
           if (!isMatch) {
             return res
               .status(400)
-              .json({ errors: [{ msg: "Invalid Credentials" }] });
+              .json([{ text: "Invalid Credentials", type: 'fail'}]);
+          }
+
+          if(!result[0].verified) {
+            return res.status(403).json([{ text: "Email is not verified", type: 'fail'}])
           }
 
           const payload = {
@@ -74,7 +78,7 @@ router.post(
           jwt.sign(
             payload,
             config.get("jwtSecret"),
-            { expiresIn: 360000 },
+            { expiresIn: 3600 },
             (err, token) => {
               if (err) throw err;
               res.json({ token });
@@ -84,7 +88,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("Server error");
+      res.status(500).json([{ text: "Server error", type: 'fail'}]);
     }
   }
 );
@@ -103,13 +107,13 @@ router.get("/emailVerification", auth, (req, res) => {
     async (err, result) => {
       if (err) {
         console.log(err);
-        res.code(500).json("Server error");
+        res.code(500).json([{ text: "Server error", type: 'fail'}]);
       } else {
         const text = `Your verification link: localhost:5000/api/auth/emailVerification/${token}`;
         const html = `Your verification link: <b>localhost:5000/api/auth/emailVerification/${token}</b>`;
 
         await sendMail(result[0].email, "Email Verification", text, html);
-        res.status(200).json({ msg: "Email send" });
+        res.status(200).json([{ text: "Email send", type: 'success'}]);
       }
     }
   );
@@ -130,14 +134,14 @@ router.post("/emailVerification/:token", (req, res) => {
           err => {
             if (err) {
               console.log(err);
-              res.code(500).json("Server error");
+              res.code(500).json([{ text: "Server error", type: 'fail'}]);
             }
-            res.status(200).json( { msg: 'Email verified' } )
+            res.status(200).json([{ text: "Email verified", type: 'success'}])
           }
         );
       }
     } catch (err) {
-      res.status(401).json({ msg: "Token is not valid" });
+      res.status(401).json([{ text: "Token is not valid", type: 'fail'}]);
     }
   }
 );

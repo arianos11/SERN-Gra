@@ -15,14 +15,16 @@ module.exports = function(req, res, next) {
         const decoded = jwt.verify(token, config.get('jwtSecret'));
         db.query(`SELECT created, verified FROM users WHERE id = ${decoded.user.id}`, (err, result) => {
             if((Date.parse(result[0].created))/1000 > decoded.iat) {
-                res.status(401).json({ msg: 'Token is not valid' });
+               return res.status(401).json({ msg: 'Token is not valid' });
             }
             if(!result[0].verified) {
-                res.status(403).json( { msg: 'Email is not verified' } );
+                return res.status(403).json( { msg: 'Email is not verified' } );
             }
+
             req.user = decoded.user;
             req.token = token;
             next();
+
         });
     } catch(err) {
         res.status(401).json({ msg: 'Token is not valid' });
