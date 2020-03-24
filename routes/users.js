@@ -4,6 +4,7 @@ const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const uuid = require("uuid")
 const { check, validationResult } = require("express-validator");
 
 // @route   GET api/users
@@ -50,7 +51,7 @@ router.post('/', [
                   verified: 1,
                   created: new Date(),
                   passwordDate: new Date(), 
-                  image: "./userImage/default.png",
+                  image: uuid.v4(),
                 };
     
                 // Send user to database

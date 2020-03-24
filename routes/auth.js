@@ -15,7 +15,11 @@ const { check, validationResult } = require("express-validator");
 router.get("/", auth, (req, res) => {
   try {
     db.query(
-      `SELECT id, username, email, image, created FROM users WHERE id = ${req.user.id}`,
+      `SELECT u.id, u.username, u.email, u.image, u.created, h.strength, h.dexterity, h.intelligence, h.stamina, h.luck, h.armor, hc.name
+      FROM users u 
+      JOIN heroes h ON h.user_id = u.id 
+      JOIN hero_classes hc ON hc.class_id = h.class_id
+      WHERE u.id = ${req.user.id}`,
       (err, result) => {
         res.status(200).json(result);
       }

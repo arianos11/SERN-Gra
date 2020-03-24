@@ -10,11 +10,6 @@ class Alert extends React.Component {
     };
   }
 
-  componentWillUpdate() {
-    console.log(this.state)
-    console.log(this.props)
-  }
-
   render() {
     return (   
       <div className="alerts">

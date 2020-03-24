@@ -36,7 +36,7 @@ class SignIn extends React.Component {
           //console.log(res);
           //console.log(this.props);
           this.props.logInState();
-          setTimeout(() => this.props.history.push("/"), 200);
+          setTimeout(() => this.props.history.push("/postac"), 200);
       } catch (err) {
         const error = err.response.data;
         console.log(error)
